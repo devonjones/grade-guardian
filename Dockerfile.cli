@@ -1,0 +1,17 @@
+FROM python:3.13-slim
+
+WORKDIR /app
+
+# Install uv
+RUN pip install uv
+
+# Copy source code and config
+COPY pyproject.toml ./
+COPY src/ ./src/
+COPY data/ ./data/
+
+# Install dependencies
+RUN uv sync
+
+# Default command runs the CLI
+ENTRYPOINT ["uv", "run", "grade-guardian"]

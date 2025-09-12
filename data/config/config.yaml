@@ -1,0 +1,17 @@
+# Grade Guardian Configuration
+
+students:
+  - name: "Test Student"
+    phone: "+1234567890"
+    grade_level: 7
+    school: "Test School"
+
+database:
+  host: "postgres"  # Docker Compose service name
+  port: 5432
+  name: "grade_monitor"
+  user: "gradebot"
+  password: "${DATABASE_PASSWORD}"
+
+# DPS credentials should be set via environment variables:
+# DPS_USERNAME and DPS_PASSWORD

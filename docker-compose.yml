@@ -1,0 +1,100 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15
+    container_name: grade-guardian-db
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-grade_monitor}
+      POSTGRES_USER: ${POSTGRES_USER:-gradebot}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-secure_password}
+      POSTGRES_INITDB_ARGS: "--encoding=UTF-8"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./sql/init.sql:/docker-entrypoint-initdb.d/01-init.sql
+    # No external port mapping - only accessible within Docker network
+    networks:
+      - grade-guardian-net
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-gradebot} -d ${POSTGRES_DB:-grade_monitor}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  flask-api:
+    build: 
+      context: .
+      dockerfile: Dockerfile.flask
+    container_name: grade-guardian-api
+    environment:
+      FLASK_ENV: development
+      FLASK_DEBUG: 1
+      DATABASE_HOST: postgres
+      DATABASE_PORT: 5432
+      DATABASE_NAME: ${POSTGRES_DB:-grade_monitor}
+      DATABASE_USER: ${POSTGRES_USER:-gradebot}
+      DATABASE_PASSWORD: ${POSTGRES_PASSWORD:-secure_password}
+    volumes:
+      - ./src:/app/src
+      - ./data:/app/data
+    ports:
+      - "5000:5000"
+    networks:
+      - grade-guardian-net
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    command: ["uv", "run", "flask", "--app", "src.grade_guardian.api.app", "run", "--host=0.0.0.0", "--port=5000", "--reload"]
+
+  scraper:
+    build:
+      context: ./scraper
+      dockerfile: Dockerfile
+    container_name: grade-guardian-scraper
+    environment:
+      DPS_USERNAME: ${DPS_USERNAME}
+      DPS_PASSWORD: ${DPS_PASSWORD}
+      OUTPUT_DIR: /app/data/scraped
+      NODE_ENV: production
+    volumes:
+      - ./data:/app/data
+    networks:
+      - grade-guardian-net
+    profiles:
+      - scraper  # Only start when explicitly requested
+    command: ["node", "dps_scraper.js"]
+
+  cli:
+    build:
+      context: .
+      dockerfile: Dockerfile.cli
+    container_name: grade-guardian-cli
+    environment:
+      DATABASE_HOST: postgres
+      DATABASE_PORT: 5432
+      DATABASE_NAME: ${POSTGRES_DB:-grade_monitor}
+      DATABASE_USER: ${POSTGRES_USER:-gradebot}
+      DATABASE_PASSWORD: ${POSTGRES_PASSWORD:-secure_password}
+    volumes:
+      - ./data:/app/data
+    networks:
+      - grade-guardian-net
+    depends_on:
+      postgres:
+        condition: service_healthy
+    profiles:
+      - cli  # Only start when explicitly requested
+
+networks:
+  grade-guardian-net:
+    driver: bridge
+    name: grade-guardian-network
+
+volumes:
+  postgres_data:
+    name: grade-guardian-postgres-data
