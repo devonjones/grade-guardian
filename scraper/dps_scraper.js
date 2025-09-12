@@ -7,7 +7,7 @@ const { chromium } = require('playwright');
 const fs = require('fs').promises;
 const path = require('path');
 
-class DPSScaper {
+class DPSScraper {
     constructor(options = {}) {
         this.username = process.env.DPS_USERNAME;
         this.password = process.env.DPS_PASSWORD;
