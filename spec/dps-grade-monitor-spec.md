@@ -17,7 +17,7 @@ Automated system to monitor student grades in Denver Public Schools (DPS) via Sc
 ### Technology Stack
 - **Primary Runtime**: Python 3.13
 - **Web Automation**: Playwright (via Node.js subprocess)
-- **Database**: PostgreSQL (psycopg2/SQLAlchemy)
+- **Database**: PostgreSQL (psycopg3)
 - **SMS Service**: Twilio API (Python SDK)
 - **Web Framework**: FastAPI or Flask
 - **Task Queue**: Celery with Redis (optional)
