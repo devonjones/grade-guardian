@@ -20,7 +20,7 @@ class GradeDataProcessor:
         self.db = db
     
     def process_scraped_file(self, json_file_path: Path) -> Dict[str, Any]:
-        """Process a single scraped JSON file."""
+        """Process a single scraped JSON file with proper transaction management."""
         try:
             logger.info(f"Processing scraped file: {json_file_path}")
             
@@ -33,50 +33,58 @@ class GradeDataProcessor:
             if not validation_result['valid']:
                 raise ValueError(f"Invalid data format: {validation_result['errors']}")
             
-            # Process the data
-            processing_result = {
-                'file': str(json_file_path),
-                'timestamp': datetime.now(timezone.utc).isoformat(),
-                'student_name': data.get('student', 'Unknown'),
-                'courses_processed': 0,
-                'assignments_processed': 0,
-                'new_assignments': 0,
-                'updated_assignments': 0,
-                'grade_changes': 0,
-                'errors': []
-            }
-            
-            # Find or create student
-            student_id = self.find_or_create_student(data.get('student', 'Unknown'))
-            if not student_id:
-                raise ValueError("Failed to create or find student record")
-            
-            # Process each course
-            for course_data in data.get('courses', []):
-                try:
-                    course_result = self.process_course(student_id, course_data)
-                    processing_result['courses_processed'] += 1
-                    processing_result['assignments_processed'] += course_result['assignments_processed']
-                    processing_result['new_assignments'] += course_result['new_assignments']
-                    processing_result['updated_assignments'] += course_result['updated_assignments']
-                    processing_result['grade_changes'] += course_result['grade_changes']
-                    
-                except Exception as e:
-                    error_msg = f"Error processing course {course_data.get('name', 'Unknown')}: {str(e)}"
-                    logger.error(error_msg)
-                    processing_result['errors'].append(error_msg)
-            
-            # Log processing result
-            self.db.log_system_event(
-                event_type="data_processing_completed",
-                severity="info",
-                message=f"Processed {processing_result['courses_processed']} courses, {processing_result['assignments_processed']} assignments",
-                details=processing_result,
-                source="processor"
-            )
-            
-            logger.info(f"Processing completed: {processing_result}")
-            return processing_result
+            # Process all data within a single transaction for consistency
+            with self.db.get_connection() as conn:
+                cursor = conn.cursor()
+                
+                # Process the data
+                processing_result = {
+                    'file': str(json_file_path),
+                    'timestamp': datetime.now(timezone.utc).isoformat(),
+                    'student_name': data.get('student', 'Unknown'),
+                    'courses_processed': 0,
+                    'assignments_processed': 0,
+                    'new_assignments': 0,
+                    'updated_assignments': 0,
+                    'grade_changes': 0,
+                    'errors': []
+                }
+                
+                # Find or create student
+                student_id = self.find_or_create_student_with_cursor(cursor, data.get('student', 'Unknown'))
+                if not student_id:
+                    raise ValueError("Failed to create or find student record")
+                
+                # Process each course
+                for course_data in data.get('courses', []):
+                    try:
+                        course_result = self.process_course_with_cursor(cursor, student_id, course_data)
+                        processing_result['courses_processed'] += 1
+                        processing_result['assignments_processed'] += course_result['assignments_processed']
+                        processing_result['new_assignments'] += course_result['new_assignments']
+                        processing_result['updated_assignments'] += course_result['updated_assignments']
+                        processing_result['grade_changes'] += course_result['grade_changes']
+                        
+                    except Exception as e:
+                        error_msg = f"Error processing course {course_data.get('name', 'Unknown')}: {str(e)}"
+                        logger.error(error_msg)
+                        processing_result['errors'].append(error_msg)
+                        # Don't raise here to allow partial processing if needed
+                
+                # Commit the entire transaction
+                conn.commit()
+                
+                # Log processing result (outside transaction to avoid nested connections)
+                self.db.log_system_event(
+                    event_type="data_processing_completed",
+                    severity="info",
+                    message=f"Processed {processing_result['courses_processed']} courses, {processing_result['assignments_processed']} assignments",
+                    details=processing_result,
+                    source="processor"
+                )
+                
+                logger.info(f"Processing completed: {processing_result}")
+                return processing_result
             
         except Exception as e:
             error_msg = f"Failed to process file {json_file_path}: {str(e)}"
@@ -150,10 +158,20 @@ class GradeDataProcessor:
         return errors
     
     def find_or_create_student(self, student_name: str) -> Optional[int]:
-        """Find existing student or create new one."""
+        """Find existing student or create new one (legacy method for backward compatibility)."""
+        with self.db.get_connection() as conn:
+            cursor = conn.cursor()
+            result = self.find_or_create_student_with_cursor(cursor, student_name)
+            conn.commit()
+            return result
+    
+    def find_or_create_student_with_cursor(self, cursor, student_name: str) -> Optional[int]:
+        """Find existing student or create new one using provided cursor."""
         try:
             # First, try to find existing student
-            students = self.db.get_students(active_only=True)
+            cursor.execute("SELECT id, name FROM students WHERE active = true")
+            students = cursor.fetchall()
+            
             for student in students:
                 if student['name'].strip().lower() == student_name.strip().lower():
                     return student['id']
@@ -164,12 +182,19 @@ class GradeDataProcessor:
             default_grade = 7
             default_school = "DPS School"
             
-            student_id = self.db.create_student(
-                name=student_name,
-                phone=default_phone,
-                grade_level=default_grade,
-                school=default_school
-            )
+            cursor.execute("""
+                INSERT INTO students (name, phone, grade_level, school)
+                VALUES (%(name)s, %(phone)s, %(grade_level)s, %(school)s)
+                RETURNING id
+            """, {
+                "name": student_name,
+                "phone": default_phone,
+                "grade_level": default_grade,
+                "school": default_school
+            })
+            
+            result = cursor.fetchone()
+            student_id = result['id'] if result else None
             
             if student_id:
                 logger.info(f"Created new student: {student_name} (ID: {student_id})")
@@ -181,7 +206,15 @@ class GradeDataProcessor:
             return None
     
     def process_course(self, student_id: int, course_data: Dict[str, Any]) -> Dict[str, Any]:
-        """Process a single course and its assignments."""
+        """Process a single course and its assignments (legacy method)."""
+        with self.db.get_connection() as conn:
+            cursor = conn.cursor()
+            result = self.process_course_with_cursor(cursor, student_id, course_data)
+            conn.commit()
+            return result
+    
+    def process_course_with_cursor(self, cursor, student_id: int, course_data: Dict[str, Any]) -> Dict[str, Any]:
+        """Process a single course and its assignments using provided cursor."""
         result = {
             'assignments_processed': 0,
             'new_assignments': 0,
@@ -190,14 +223,14 @@ class GradeDataProcessor:
         }
         
         # Find or create course
-        course_id = self.find_or_create_course(student_id, course_data)
+        course_id = self.find_or_create_course_with_cursor(cursor, student_id, course_data)
         if not course_id:
             raise ValueError(f"Failed to create course: {course_data.get('name', 'Unknown')}")
         
         # Process assignments
         for assignment_data in course_data.get('assignments', []):
             try:
-                assignment_result = self.process_assignment(course_id, assignment_data)
+                assignment_result = self.process_assignment_with_cursor(cursor, course_id, assignment_data)
                 result['assignments_processed'] += 1
                 
                 if assignment_result['is_new']:
@@ -215,80 +248,94 @@ class GradeDataProcessor:
         return result
     
     def find_or_create_course(self, student_id: int, course_data: Dict[str, Any]) -> Optional[int]:
-        """Find existing course or create new one."""
+        """Find existing course or create new one (legacy method)."""
+        with self.db.get_connection() as conn:
+            cursor = conn.cursor()
+            result = self.find_or_create_course_with_cursor(cursor, student_id, course_data)
+            conn.commit()
+            return result
+    
+    def find_or_create_course_with_cursor(self, cursor, student_id: int, course_data: Dict[str, Any]) -> Optional[int]:
+        """Find existing course or create new one using provided cursor."""
         try:
-            with self.db.get_connection() as conn:
-                cursor = conn.cursor()
-                
-                # Try to find existing course
-                cursor.execute("""
-                    SELECT id FROM courses 
-                    WHERE student_id = %(student_id)s 
-                    AND (schoology_id = %(schoology_id)s OR name = %(name)s)
-                    AND active = true
-                """, {
-                    'student_id': student_id,
-                    'schoology_id': course_data.get('schoology_id'),
-                    'name': course_data.get('name')
-                })
-                
-                existing = cursor.fetchone()
-                if existing:
-                    return existing['id']
-                
-                # Create new course
-                cursor.execute("""
-                    INSERT INTO courses (student_id, schoology_id, name, teacher, semester, year)
-                    VALUES (%(student_id)s, %(schoology_id)s, %(name)s, %(teacher)s, %(semester)s, %(year)s)
-                    RETURNING id
-                """, {
-                    'student_id': student_id,
-                    'schoology_id': course_data.get('schoology_id'),
-                    'name': course_data.get('name'),
-                    'teacher': course_data.get('teacher'),
-                    'semester': course_data.get('semester', 'Current'),
-                    'year': datetime.now().year
-                })
-                
-                result = cursor.fetchone()
-                conn.commit()
-                
-                if result:
-                    logger.info(f"Created new course: {course_data.get('name')} (ID: {result['id']})")
-                    return result['id']
-                
+            # Try to find existing course
+            cursor.execute("""
+                SELECT id FROM courses 
+                WHERE student_id = %(student_id)s 
+                AND (schoology_id = %(schoology_id)s OR name = %(name)s)
+                AND active = true
+            """, {
+                'student_id': student_id,
+                'schoology_id': course_data.get('schoology_id'),
+                'name': course_data.get('name')
+            })
+            
+            existing = cursor.fetchone()
+            if existing:
+                return existing['id']
+            
+            # Create new course
+            cursor.execute("""
+                INSERT INTO courses (student_id, schoology_id, name, teacher, semester, year)
+                VALUES (%(student_id)s, %(schoology_id)s, %(name)s, %(teacher)s, %(semester)s, %(year)s)
+                RETURNING id
+            """, {
+                'student_id': student_id,
+                'schoology_id': course_data.get('schoology_id'),
+                'name': course_data.get('name'),
+                'teacher': course_data.get('teacher'),
+                'semester': course_data.get('semester', 'Current'),
+                'year': datetime.now().year
+            })
+            
+            result = cursor.fetchone()
+            
+            if result:
+                logger.info(f"Created new course: {course_data.get('name')} (ID: {result['id']})")
+                return result['id']
+            
         except Exception as e:
             logger.error(f"Error finding/creating course {course_data.get('name', 'Unknown')}: {e}")
             
         return None
     
     def process_assignment(self, course_id: int, assignment_data: Dict[str, Any]) -> Dict[str, Any]:
-        """Process a single assignment and its grade history."""
+        """Process a single assignment and its grade history (legacy method)."""
+        with self.db.get_connection() as conn:
+            cursor = conn.cursor()
+            result = self.process_assignment_with_cursor(cursor, course_id, assignment_data)
+            conn.commit()
+            return result
+    
+    def process_assignment_with_cursor(self, cursor, course_id: int, assignment_data: Dict[str, Any]) -> Dict[str, Any]:
+        """Process a single assignment and its grade history using provided cursor."""
         try:
-            with self.db.get_connection() as conn:
-                cursor = conn.cursor()
-                
-                # Find or create assignment
-                assignment_id = self.find_or_create_assignment(cursor, course_id, assignment_data)
-                if not assignment_id:
-                    raise ValueError("Failed to create assignment")
-                
-                # Process grade history
-                grade_changed = self.process_grade_history(cursor, assignment_id, assignment_data)
-                
-                conn.commit()
-                
-                return {
-                    'is_new': True,  # For Phase 1, we'll assume all are new
-                    'grade_changed': grade_changed
-                }
+            # Find or create assignment
+            assignment_result = self.find_or_create_assignment_with_cursor(cursor, course_id, assignment_data)
+            if not assignment_result:
+                raise ValueError("Failed to create assignment")
+            
+            assignment_id, is_new = assignment_result
+            
+            # Process grade history
+            grade_changed = self.process_grade_history_with_cursor(cursor, assignment_id, assignment_data)
+            
+            return {
+                'is_new': is_new,
+                'grade_changed': grade_changed
+            }
                 
         except Exception as e:
             logger.error(f"Error processing assignment {assignment_data.get('name', 'Unknown')}: {e}")
             raise
     
     def find_or_create_assignment(self, cursor, course_id: int, assignment_data: Dict[str, Any]) -> Optional[int]:
-        """Find existing assignment or create new one."""
+        """Find existing assignment or create new one (legacy method)."""
+        result = self.find_or_create_assignment_with_cursor(cursor, course_id, assignment_data)
+        return result[0] if result else None
+    
+    def find_or_create_assignment_with_cursor(self, cursor, course_id: int, assignment_data: Dict[str, Any]) -> Optional[tuple[int, bool]]:
+        """Find existing assignment or create new one, returns (id, is_new)."""
         try:
             # Try to find existing assignment
             cursor.execute("""
@@ -303,7 +350,7 @@ class GradeDataProcessor:
             
             existing = cursor.fetchone()
             if existing:
-                return existing['id']
+                return existing['id'], False  # Found existing, not new
             
             # Parse dates
             due_date = None
@@ -345,14 +392,18 @@ class GradeDataProcessor:
             })
             
             result = cursor.fetchone()
-            return result['id'] if result else None
+            return (result['id'], True) if result else None  # Created new
             
         except Exception as e:
             logger.error(f"Error finding/creating assignment: {e}")
             return None
     
     def process_grade_history(self, cursor, assignment_id: int, assignment_data: Dict[str, Any]) -> bool:
-        """Process grade history for an assignment."""
+        """Process grade history for an assignment (legacy method)."""
+        return self.process_grade_history_with_cursor(cursor, assignment_id, assignment_data)
+    
+    def process_grade_history_with_cursor(self, cursor, assignment_id: int, assignment_data: Dict[str, Any]) -> bool:
+        """Process grade history for an assignment using provided cursor."""
         try:
             # Get current grade status
             points_earned = assignment_data.get('points_earned')

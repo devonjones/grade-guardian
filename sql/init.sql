@@ -130,6 +130,7 @@ CREATE TRIGGER update_students_updated_at BEFORE UPDATE ON students FOR EACH ROW
 CREATE TRIGGER update_courses_updated_at BEFORE UPDATE ON courses FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 CREATE TRIGGER update_assignments_updated_at BEFORE UPDATE ON assignments FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 CREATE TRIGGER update_reminders_updated_at BEFORE UPDATE ON reminders FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+CREATE TRIGGER update_parent_actions_updated_at BEFORE UPDATE ON parent_actions FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
 -- Insert initial test data
 INSERT INTO students (name, phone, grade_level, school) VALUES 

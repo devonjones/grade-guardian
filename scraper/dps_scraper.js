@@ -31,6 +31,7 @@ class DPSScraper {
     async scrapeGrades(studentName = null) {
         let browser = null;
         let context = null;
+        let page = null;
         
         try {
             console.log('🚀 Starting DPS grade scraping...');
@@ -45,7 +46,7 @@ class DPSScraper {
                 userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
             });
             
-            const page = await context.newPage();
+            page = await context.newPage();
             page.setDefaultTimeout(this.timeout);
             
             // Step 1: Navigate to DPS portal
@@ -78,9 +79,8 @@ class DPSScraper {
             console.error('❌ Scraping failed:', error);
             
             // Take screenshot for debugging
-            if (context) {
+            if (page) {
                 try {
-                    const page = await context.newPage();
                     const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
                     await page.screenshot({ 
                         path: path.join(this.outputDir, `error_${timestamp}.png`),
@@ -323,7 +323,7 @@ async function main() {
         const studentName = args.find(arg => arg.startsWith('--student='))?.split('=')[1];
         const headless = !args.includes('--no-headless');
         
-        const scraper = new DPSScaper({ 
+        const scraper = new DPSScraper({ 
             headless,
             outputDir: process.env.OUTPUT_DIR || '../data/scraped'
         });
@@ -342,4 +342,4 @@ if (require.main === module) {
     main();
 }
 
-module.exports = { DPSScaper };
+module.exports = { DPSScraper };

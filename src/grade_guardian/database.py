@@ -2,6 +2,7 @@
 
 import psycopg
 from psycopg.rows import dict_row
+from psycopg.pool import ConnectionPool
 from contextlib import contextmanager
 from typing import Generator, Dict, List, Any, Optional
 import logging
@@ -10,18 +11,26 @@ from .config import AppConfig, get_database_url
 logger = logging.getLogger(__name__)
 
 class DatabaseManager:
-    """Manages PostgreSQL database connections and operations."""
+    """Manages PostgreSQL database connections and operations with connection pooling."""
     
-    def __init__(self, config: AppConfig):
+    def __init__(self, config: AppConfig, pool_size: int = 10, max_size: int = 20):
         self.config = config
         self.connection_url = get_database_url(config)
+        # Initialize connection pool for better performance
+        self.pool = ConnectionPool(
+            self.connection_url,
+            min_size=2,
+            max_size=pool_size,
+            kwargs={"row_factory": dict_row}
+        )
+        logger.info(f"Database connection pool initialized with max_size={pool_size}")
     
     @contextmanager
     def get_connection(self) -> Generator[psycopg.Connection, None, None]:
-        """Get a database connection with automatic cleanup."""
+        """Get a database connection from the pool with automatic cleanup."""
         conn = None
         try:
-            conn = psycopg.connect(self.connection_url, row_factory=dict_row)
+            conn = self.pool.getconn()
             conn.autocommit = False
             yield conn
         except Exception as e:
@@ -31,7 +40,13 @@ class DatabaseManager:
             raise
         finally:
             if conn:
-                conn.close()
+                self.pool.putconn(conn)
+    
+    def close_pool(self):
+        """Close the connection pool. Should be called when shutting down the application."""
+        if self.pool:
+            self.pool.close()
+            logger.info("Database connection pool closed")
     
     def test_connection(self) -> bool:
         """Test database connectivity."""

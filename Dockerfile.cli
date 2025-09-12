@@ -13,5 +13,12 @@ COPY data/ ./data/
 # Install dependencies
 RUN uv sync
 
+# Create a non-root user for security
+RUN useradd --create-home --shell /bin/bash appuser && \
+    chown -R appuser:appuser /app
+
+# Switch to non-root user
+USER appuser
+
 # Default command runs the CLI
 ENTRYPOINT ["uv", "run", "grade-guardian"]
