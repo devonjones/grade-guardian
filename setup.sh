@@ -45,7 +45,7 @@ mkdir -p sql
 # Install Node.js dependencies for scraper
 echo "📦 Installing Node.js dependencies..."
 cd scraper
-npm install
+npm ci
 cd ..
 
 # Build Docker images
