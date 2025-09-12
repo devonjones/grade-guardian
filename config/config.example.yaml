@@ -1,0 +1,80 @@
+# Grade Guardian Configuration
+# Copy this file to config.yaml and customize for your needs
+
+# Application Settings
+app:
+  environment: development
+  test_mode: true
+  log_level: INFO
+  log_file: logs/grade_guardian.log
+
+# Student Information
+students:
+  - name: "Aurelia"
+    phone: "+1XXXXXXXXXX"
+    grade_level: 7
+    school: "Denver School of Arts MS"
+    active: true
+  
+  - name: "Anastasia"
+    phone: "+1XXXXXXXXXX"
+    grade_level: 3
+    school: "Willow Elementary"
+    active: true
+
+# Parent Contact Information
+parent:
+  phone: "+1XXXXXXXXXX"
+  email: "parent@example.com"
+  timezone: "America/Denver"
+
+# School Calendar
+school_calendar:
+  holidays: []
+  early_release_days: []
+  testing_periods: []
+  semester_end_dates:
+    - "2024-12-20"
+    - "2025-05-23"
+
+# Notification Settings
+notifications:
+  twilio:
+    from_phone: "+1XXXXXXXXXX"
+    enable_sms: false  # Set to true in production
+  
+  email:
+    from_address: "grade-guardian@example.com"
+    enable_email: false  # Set to true in production
+  
+  timing:
+    before_class_minutes: 5
+    after_class_start_minutes: -5  # 5 min before class ends
+    max_reminders_per_assignment: 3
+    reminder_cooldown_days: 1
+
+# Scheduling Configuration
+scheduling:
+  enable_scheduler: false
+  morning_sync_time: "02:00"
+  reminder_check_interval: 60  # minutes
+  timezone: "America/Denver"
+
+# Scraping Configuration
+scraper:
+  playwright:
+    headless: true
+    timeout: 30000
+    script_path: "./scraper/dps_scraper.js"
+  
+  retry:
+    auto_retry: true
+    max_attempts: 3
+    backoff_seconds: 60
+
+# Feature Flags
+features:
+  send_positive_reinforcement: true
+  detect_makeup_opportunities: true
+  parent_dashboard: true
+  grade_trend_analysis: true
