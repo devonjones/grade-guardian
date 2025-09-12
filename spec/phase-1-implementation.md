@@ -26,7 +26,7 @@
 - [ ] Create database initialization SQL scripts
 - [ ] Implement core tables from spec:
   - `students`
-  - `courses` 
+  - `courses`
   - `assignments`
   - `grade_history`
   - `reminders`
