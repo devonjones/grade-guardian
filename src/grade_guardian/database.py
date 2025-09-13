@@ -6,8 +6,13 @@ from contextlib import contextmanager
 from typing import Any
 
 import psycopg
-from psycopg.pool import ConnectionPool
 from psycopg.rows import dict_row
+
+try:
+    from psycopg.pool import ConnectionPool
+except ImportError:
+    # Fallback for environments where pool is not available
+    ConnectionPool = None
 
 from .config import AppConfig, get_database_url
 
@@ -20,18 +25,32 @@ class DatabaseManager:
     def __init__(self, config: AppConfig, pool_size: int = 10, max_size: int = 20):
         self.config = config
         self.connection_url = get_database_url(config)
-        # Initialize connection pool for better performance
-        self.pool = ConnectionPool(
-            self.connection_url, min_size=2, max_size=pool_size, kwargs={"row_factory": dict_row}
-        )
-        logger.info(f"Database connection pool initialized with max_size={pool_size}")
+
+        # Initialize connection pool for better performance if available
+        if ConnectionPool is not None:
+            self.pool = ConnectionPool(
+                self.connection_url,
+                min_size=2,
+                max_size=pool_size,
+                kwargs={"row_factory": dict_row},
+            )
+            logger.info(f"Database connection pool initialized with max_size={pool_size}")
+            self._use_pool = True
+        else:
+            logger.warning("ConnectionPool not available, using direct connections")
+            self.pool = None
+            self._use_pool = False
 
     @contextmanager
     def get_connection(self) -> Generator[psycopg.Connection]:
         """Get a database connection from the pool with automatic cleanup."""
         conn = None
         try:
-            conn = self.pool.getconn()
+            if self._use_pool:
+                conn = self.pool.getconn()
+            else:
+                conn = psycopg.connect(self.connection_url, row_factory=dict_row)
+
             conn.autocommit = False
             yield conn
         except Exception as e:
@@ -41,11 +60,14 @@ class DatabaseManager:
             raise
         finally:
             if conn:
-                self.pool.putconn(conn)
+                if self._use_pool:
+                    self.pool.putconn(conn)
+                else:
+                    conn.close()
 
     def close_pool(self):
         """Close the connection pool. Should be called when shutting down the application."""
-        if self.pool:
+        if self._use_pool and self.pool:
             self.pool.close()
             logger.info("Database connection pool closed")
 
