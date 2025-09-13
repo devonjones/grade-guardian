@@ -11,7 +11,7 @@ class DPSScraper {
   constructor(options = {}) {
     this.username = process.env.DPS_USERNAME;
     this.password = process.env.DPS_PASSWORD;
-    this.outputDir = options.outputDir || '../tests/fixtures/scraped';
+    this.outputDir = options.outputDir || '../data/scraped';
     this.headless = options.headless !== false; // Default to headless
     this.timeout = options.timeout || 30000; // 30 second timeout
 
@@ -315,17 +315,45 @@ class DPSScraper {
 
 // CLI execution
 async function main() {
-  try {
-    const args = process.argv.slice(2);
-    const studentName = args.find((arg) => arg.startsWith('--student='))?.split('=')[1];
-    const headless = !args.includes('--no-headless');
+  const yargs = require('yargs/yargs');
+  const { hideBin } = require('yargs/helpers');
 
+  const argv = yargs(hideBin(process.argv))
+    .option('student', {
+      alias: 's',
+      type: 'string',
+      description: 'Specific student name to scrape data for',
+    })
+    .option('headless', {
+      type: 'boolean',
+      default: true,
+      description: 'Run browser in headless mode',
+    })
+    .option('output-dir', {
+      alias: 'o',
+      type: 'string',
+      description: 'Directory to save scraped JSON files',
+      default: process.env.OUTPUT_DIR || '../data/scraped',
+    })
+    .option('timeout', {
+      alias: 't',
+      type: 'number',
+      default: 30000,
+      description: 'Timeout in milliseconds for page operations',
+    })
+    .help()
+    .alias('help', 'h')
+    .version('0.1.0')
+    .argv;
+
+  try {
     const scraper = new DPSScraper({
-      headless,
-      outputDir: process.env.OUTPUT_DIR || '../tests/fixtures/scraped',
+      headless: argv.headless,
+      outputDir: argv.outputDir,
+      timeout: argv.timeout,
     });
 
-    await scraper.scrapeGrades(studentName);
+    await scraper.scrapeGrades(argv.student);
     process.exit(0);
   } catch (error) {
     console.error('💥 Scraper failed:', error.message);

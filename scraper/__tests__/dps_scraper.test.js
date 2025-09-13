@@ -13,6 +13,10 @@ jest.mock('playwright', () => ({
   },
 }));
 
+// Mock yargs for CLI testing
+jest.mock('yargs/yargs');
+jest.mock('yargs/helpers');
+
 describe('DPSScraper', () => {
   let scraper;
   let mockBrowser;
@@ -83,7 +87,7 @@ describe('DPSScraper', () => {
 
     test('should use default options', () => {
       const defaultScraper = new DPSScraper();
-      expect(defaultScraper.outputDir).toBe('../tests/fixtures/scraped');
+      expect(defaultScraper.outputDir).toBe('../data/scraped');
       expect(defaultScraper.headless).toBe(true);
       expect(defaultScraper.timeout).toBe(30000);
     });

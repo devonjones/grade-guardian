@@ -35,10 +35,10 @@ RUN useradd --create-home --shell /bin/bash appuser && \
 USER appuser
 
 # Create output directory
-RUN mkdir -p /app/tests/fixtures/scraped
+RUN mkdir -p /app/data/scraped
 
 # Set environment
-ENV OUTPUT_DIR=/app/tests/fixtures/scraped
+ENV OUTPUT_DIR=/app/data/scraped
 ENV NODE_ENV=production
 
 # Default command
