@@ -59,7 +59,7 @@ CREATE TABLE grade_history (
     assignment_id INTEGER REFERENCES assignments(id) ON DELETE CASCADE,
     points_earned DECIMAL(10,2),
     percentage DECIMAL(5,2),
-    status VARCHAR(50), -- missing|graded|pending|excused
+    status VARCHAR(50) CHECK (status IN ('missing', 'graded', 'pending', 'excused')), -- missing|graded|pending|excused
     raw_display VARCHAR(100), -- What was actually displayed in Schoology
     is_current BOOLEAN DEFAULT true,
     recorded_at TIMESTAMP DEFAULT NOW(),
@@ -75,7 +75,7 @@ CREATE TABLE reminders (
     scheduled_for TIMESTAMP NOT NULL,
     sent_at TIMESTAMP,
     message_text TEXT,
-    status VARCHAR(50) DEFAULT 'pending', -- pending|sent|failed|cancelled
+    status VARCHAR(50) DEFAULT 'pending' CHECK (status IN ('pending', 'sent', 'failed', 'cancelled')), -- pending|sent|failed|cancelled
     twilio_sid VARCHAR(100),
     failure_reason TEXT,
     created_at TIMESTAMP DEFAULT NOW(),
@@ -87,7 +87,7 @@ CREATE TABLE parent_actions (
     id SERIAL PRIMARY KEY,
     uuid UUID DEFAULT uuid_generate_v4() UNIQUE NOT NULL,
     assignment_id INTEGER REFERENCES assignments(id) ON DELETE CASCADE,
-    action_type VARCHAR(50) NOT NULL, -- excuse|ignore|prioritize|pause
+    action_type VARCHAR(50) NOT NULL CHECK (action_type IN ('excuse', 'ignore', 'prioritize', 'pause')), -- excuse|ignore|prioritize|pause
     reason TEXT,
     expires_at TIMESTAMP,
     created_at TIMESTAMP DEFAULT NOW(),
@@ -99,7 +99,7 @@ CREATE TABLE system_events (
     id SERIAL PRIMARY KEY,
     uuid UUID DEFAULT uuid_generate_v4() UNIQUE NOT NULL,
     event_type VARCHAR(100) NOT NULL,
-    severity VARCHAR(20) NOT NULL, -- info|warning|error|critical
+    severity VARCHAR(20) NOT NULL CHECK (severity IN ('info', 'warning', 'error', 'critical')), -- info|warning|error|critical
     message TEXT NOT NULL,
     details JSONB,
     source VARCHAR(50), -- scraper|api|scheduler|etc

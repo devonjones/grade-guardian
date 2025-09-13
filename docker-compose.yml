@@ -27,8 +27,6 @@ services:
       dockerfile: Dockerfile.flask
     container_name: grade-guardian-api
     environment:
-      FLASK_ENV: development
-      FLASK_DEBUG: 1
       DATABASE_HOST: postgres
       DATABASE_PORT: 5432
       DATABASE_NAME: ${POSTGRES_DB:-grade_monitor}
@@ -49,7 +47,7 @@ services:
       interval: 30s
       timeout: 10s
       retries: 3
-    command: ["uv", "run", "flask", "--app", "src.grade_guardian.api.app", "run", "--host=0.0.0.0", "--port=5000", "--reload"]
+    # Development command moved to docker-compose.override.yml
 
   scraper:
     build:

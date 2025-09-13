@@ -254,8 +254,8 @@ class DPSScraper {
             
             console.log(`📚 Found ${courseLinks.length} courses`);
             
-            // Scrape each course (limit to 3 for Phase 1 testing)
-            const maxCourses = Math.min(courseLinks.length, 3);
+            // Scrape all courses found
+            const maxCourses = courseLinks.length;
             for (let i = 0; i < maxCourses; i++) {
                 try {
                     console.log(`📖 Scraping course ${i + 1}/${maxCourses}...`);

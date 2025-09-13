@@ -91,10 +91,10 @@ def health(ctx):
 @cli.command()
 @click.option('--student-name', help='Scrape data for specific student only')
 @click.option('--output-dir', help='Directory to save scraped JSON files')
-@click.option('--use-docker', is_flag=True, help='Use Docker scraper container')
+@click.option('--run-scraper', is_flag=True, help='Run actual Playwright scraper instead of generating sample data')
 @click.pass_context
-def test_scrape(ctx, student_name: Optional[str], output_dir: Optional[str], use_docker: bool):
-    """Run a test scrape of DPS/Schoology data."""
+def test_scrape(ctx, student_name: Optional[str], output_dir: Optional[str], run_scraper: bool):
+    """Run a test scrape of DPS/Schoology data (generates sample data by default, use --run-scraper for real scraping)."""
     config = ctx.obj.get('config')
     db = ctx.obj.get('db')
     processor = ctx.obj.get('processor')
@@ -127,7 +127,7 @@ def test_scrape(ctx, student_name: Optional[str], output_dir: Optional[str], use
     )
     
     try:
-        if use_docker:
+        if run_scraper:
             # Run scraper via Docker
             click.echo("🐳 Running Playwright scraper in Docker...")
             output_file = run_docker_scraper(output_path, student_name)

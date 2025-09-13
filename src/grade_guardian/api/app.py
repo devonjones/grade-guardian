@@ -31,6 +31,13 @@ def create_app():
         config = None
         db = None
     
+    @app.before_request
+    def check_database():
+        """Check database availability before processing any request."""
+        if request.endpoint not in ['health']:  # Allow health check even if DB is down
+            if not db:
+                return jsonify({"error": "Database not available"}), 500
+    
     @app.route('/health')
     def health():
         """Health check endpoint."""
@@ -69,9 +76,6 @@ def create_app():
     def get_students():
         """Get all students."""
         try:
-            if not db:
-                return jsonify({"error": "Database not available"}), 500
-            
             students = db.get_students()
             return jsonify({
                 "students": students,
@@ -86,8 +90,6 @@ def create_app():
     def create_student():
         """Create a new student."""
         try:
-            if not db:
-                return jsonify({"error": "Database not available"}), 500
             
             data = request.get_json()
             if not data:
@@ -121,10 +123,10 @@ def create_app():
     def system_status():
         """Get detailed system status."""
         try:
-            if not db or not config:
+            if not config:
                 return jsonify({
                     "status": "error",
-                    "error": "System not properly initialized"
+                    "error": "Configuration not properly initialized"
                 }), 500
             
             # Get database status
@@ -161,8 +163,6 @@ def create_app():
     def get_scraped_data():
         """Get list of scraped data files."""
         try:
-            if not config:
-                return jsonify({"error": "Configuration not available"}), 500
             
             scraped_files = []
             if config.scraped_dir.exists():

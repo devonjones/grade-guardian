@@ -59,7 +59,7 @@
 - [ ] Install Playwright dependencies
 - [ ] Create manual DPS portal login script (`scraper/dps_login.js`)
 - [ ] Implement Duo authentication handling (manual approval initially)
-- [ ] Create Schoology navigation script (`scraper/schoology_nav.js`)
+- [ ] Create Schoology navigation script (`scraper/schoology_scraper.js`)
 - [ ] Implement single course grade scraping
 - [ ] Output structured JSON to `data/scraped/` directory
 - [ ] Create Dockerfile for one-shot scraper execution
@@ -136,7 +136,7 @@ grade-guardian/
 # .env file for compose
 POSTGRES_DB=grade_monitor
 POSTGRES_USER=gradebot
-POSTGRES_PASSWORD=secure_password
+POSTGRES_PASSWORD=<your_secure_password>
 POSTGRES_PORT=5432
 FLASK_ENV=development
 FLASK_DEBUG=1
@@ -146,7 +146,7 @@ FLASK_DEBUG=1
 ```yaml
 # data/config/config.yaml
 database:
-  host: "localhost"  # Will be postgres container name in compose
+  host: "postgres"  # Docker Compose service name
   port: 5432
   name: "grade_monitor"
   user: "gradebot"
