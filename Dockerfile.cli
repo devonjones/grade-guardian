@@ -11,10 +11,9 @@ COPY pyproject.toml uv.lock* ./
 # Install dependencies (cached layer)
 RUN uv sync
 
-# Copy source code, config, and test fixtures (changes more frequently)
+# Copy source code and config (changes more frequently)
 COPY src/ ./src/
 COPY config/ ./config/
-COPY tests/fixtures/ ./tests/fixtures/
 
 # Create a non-root user for security
 RUN useradd --create-home --shell /bin/bash appuser && \

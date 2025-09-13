@@ -61,9 +61,9 @@ class TestAppConfig:
         assert isinstance(config.database, DatabaseConfig)
         assert config.students == []
         assert config.dps is None
-        assert config.data_dir == Path("tests/fixtures")
-        assert config.scraped_dir == Path("tests/fixtures/scraped")
-        assert config.config_dir == Path("tests/fixtures/config")
+        assert config.data_dir == Path("data")
+        assert config.scraped_dir == Path("data/scraped")
+        assert config.config_dir == Path("config")
 
     def test_config_with_students(self):
         """Test configuration with student data."""
