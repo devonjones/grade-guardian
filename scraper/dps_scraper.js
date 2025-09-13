@@ -343,8 +343,7 @@ async function main() {
     })
     .help()
     .alias('help', 'h')
-    .version('0.1.0')
-    .argv;
+    .version('0.1.0').argv;
 
   try {
     const scraper = new DPSScraper({
