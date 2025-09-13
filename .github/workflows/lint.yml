@@ -80,13 +80,7 @@ jobs:
         run: uv sync --extra dev
 
       - name: Run Python tests
-        run: uv run pytest --cov-report=xml
-
-      - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v3
-        with:
-          file: ./coverage.xml
-          fail_ci_if_error: true
+        run: uv run pytest
 
   test-javascript:
     name: Test JavaScript Code
