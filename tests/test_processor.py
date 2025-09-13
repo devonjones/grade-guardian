@@ -101,7 +101,12 @@ class TestGradeDataProcessor:
             mock_conn = Mock()
             mock_cursor = Mock()
             mock_conn.cursor.return_value = mock_cursor
-            mock_db.get_connection.return_value.__enter__.return_value = mock_conn
+            
+            # Mock the context manager properly
+            mock_context = Mock()
+            mock_context.__enter__.return_value = mock_conn
+            mock_context.__exit__.return_value = None
+            mock_db.get_connection.return_value = mock_context
 
             # Mock the cursor-based methods
             processor.find_or_create_student_with_cursor = Mock(return_value=1)
