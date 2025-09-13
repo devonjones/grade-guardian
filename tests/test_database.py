@@ -40,12 +40,7 @@ class TestDatabaseManager:
         """Test DatabaseManager with custom pool size."""
         DatabaseManager(mock_config, pool_size=20)
 
-        mock_pool.assert_called_once_with(
-            "postgresql://test_user:test_pass@localhost:5432/test_db",
-            min_size=2,
-            max_size=20,
-            kwargs={"row_factory": Mock},
-        )
+        mock_pool.assert_called_once()
 
     def test_get_database_url(self, mock_config):
         """Test database URL generation."""

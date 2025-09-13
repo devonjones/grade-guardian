@@ -16,7 +16,7 @@ class DatabaseConfig(BaseModel):
     port: int = Field(default=5432)
     name: str = Field(default="grade_monitor")
     user: str = Field(default="gradebot")
-    password: str = Field(default="secure_password")
+    password: str | None = Field(default=None)
 
 
 class StudentConfig(BaseModel):
