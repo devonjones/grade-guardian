@@ -19,7 +19,8 @@ RUN uv sync
 # Copy source code (changes more frequently)
 COPY src/ ./src/
 
-# Copy test fixtures
+# Copy configuration and data directories
+COPY config/ ./config/
 COPY tests/fixtures/ ./tests/fixtures/
 
 # Create a non-root user for security
@@ -27,8 +28,8 @@ RUN useradd --create-home --shell /bin/bash appuser && \
     chown -R appuser:appuser /app
 
 # Create directories with correct ownership
-RUN mkdir -p tests/fixtures/config tests/fixtures/scraped && \
-    chown -R appuser:appuser tests/fixtures/
+RUN mkdir -p data/scraped config tests/fixtures/config tests/fixtures/scraped && \
+    chown -R appuser:appuser data config tests/fixtures/
 
 # Switch to non-root user
 USER appuser

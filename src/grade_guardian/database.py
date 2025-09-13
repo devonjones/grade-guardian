@@ -1,5 +1,6 @@
 """Database connection and operations for Grade Guardian."""
 
+import json
 import logging
 from collections.abc import Generator
 from contextlib import contextmanager
@@ -138,9 +139,8 @@ class DatabaseManager:
         try:
             with self.get_connection() as conn:
                 cursor = conn.cursor()
-                import json as json_module
 
-                details_json = json_module.dumps(details) if details else None
+                details_json = json.dumps(details) if details else None
                 cursor.execute(
                     """
                     INSERT INTO system_events (event_type, severity, message, details, source)

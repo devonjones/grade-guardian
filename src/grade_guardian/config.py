@@ -36,9 +36,9 @@ class AppConfig(BaseModel):
     database: DatabaseConfig = Field(default_factory=DatabaseConfig)
     students: list[StudentConfig] = Field(default_factory=list)
     dps: DPSConfig | None = None
-    data_dir: Path = Field(default=Path("tests/fixtures"))
-    scraped_dir: Path = Field(default=Path("tests/fixtures/scraped"))
-    config_dir: Path = Field(default=Path("tests/fixtures/config"))
+    data_dir: Path = Field(default=Path("data"))
+    scraped_dir: Path = Field(default=Path("data/scraped"))
+    config_dir: Path = Field(default=Path("config"))
 
     def __init__(self, **data):
         super().__init__(**data)
@@ -52,7 +52,7 @@ def load_config(config_path: Path | None = None) -> AppConfig:
     """Load configuration from YAML file and environment variables."""
 
     if config_path is None:
-        config_path = Path("tests/fixtures/config/config.yaml")
+        config_path = Path("config/config.yaml")
 
     # Start with defaults
     config_data = {}

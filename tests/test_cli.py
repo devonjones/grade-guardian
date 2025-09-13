@@ -2,6 +2,8 @@
 
 from unittest.mock import Mock, patch
 
+from pathlib import Path
+
 import pytest
 from click.testing import CliRunner
 
@@ -111,8 +113,6 @@ class TestCLI:
         mock_processor_class.return_value = mock_processor
 
         # Mock sample data creation
-        from pathlib import Path
-
         mock_file_path = Path("/tmp/test_file.json")
         mock_create_sample.return_value = mock_file_path
 

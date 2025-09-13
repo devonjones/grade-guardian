@@ -6,7 +6,7 @@ readme = { text = "Grade Guardian - Automated grade monitoring for DPS/Schoology
 authors = [
     { name = "Devon Jones", email = "devon.jones@gmail.com" }
 ]
-requires-python = ">=3.13"
+requires-python = ">=3.12"
 dependencies = [
     "python-dotenv>=1.0.0",
     "pyyaml>=6.0.0",
@@ -41,17 +41,19 @@ line-length = 100
 target-version = "py312"
 
 [tool.ruff.lint]
-# Enable moderate rule sets
+# Enable moderate rule sets + strict import rules
 select = [
     "E",   # pycodestyle errors
     "W",   # pycodestyle warnings
     "F",   # Pyflakes
-    "I",   # isort
+    "I",   # isort (import sorting and organization)
     "N",   # pep8-naming
     "UP",  # pyupgrade
     "B",   # flake8-bugbear
     "C4",  # flake8-comprehensions
     "SIM", # flake8-simplify
+    "E401", # Multiple imports on one line
+    "E402", # Module imports not at top of file
 ]
 
 # Ignore overly strict rules for moderate config
@@ -64,7 +66,8 @@ ignore = [
 [tool.ruff.lint.per-file-ignores]
 # Allow longer lines in migration files and config
 "sql/*.sql" = ["E501"]
-"data/**" = ["E501"]
+"tests/fixtures/**" = ["E501"]
+"config/**" = ["E501"]
 
 [tool.ruff.format]
 # Use double quotes, indent with 4 spaces

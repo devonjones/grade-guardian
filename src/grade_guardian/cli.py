@@ -317,7 +317,7 @@ def init_db(ctx):
 @click.pass_context
 def create_config(ctx, config_path: str | None):
     """Create a default configuration file."""
-    path = Path(config_path) if config_path else Path("tests/fixtures/config/config.yaml")
+    path = Path(config_path) if config_path else Path("config/config.yaml")
 
     if path.exists():
         click.confirm(f"Config file {path} already exists. Overwrite?", abort=True)
