@@ -3,7 +3,7 @@
 import json
 import tempfile
 from pathlib import Path
-from unittest.mock import Mock
+from unittest.mock import Mock, MagicMock
 
 import pytest
 
@@ -102,8 +102,8 @@ class TestGradeDataProcessor:
             mock_cursor = Mock()
             mock_conn.cursor.return_value = mock_cursor
             
-            # Mock the context manager properly
-            mock_context = Mock()
+            # Mock the context manager properly using MagicMock for magic methods
+            mock_context = MagicMock()
             mock_context.__enter__.return_value = mock_conn
             mock_context.__exit__.return_value = None
             mock_db.get_connection.return_value = mock_context
