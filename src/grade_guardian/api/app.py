@@ -35,9 +35,8 @@ def create_app():
     @app.before_request
     def check_database():
         """Check database availability before processing any request."""
-        if request.endpoint not in ["health"]:  # Allow health check even if DB is down
-            if not db:
-                return jsonify({"error": "Database not available"}), 500
+        if request.endpoint not in ["health"] and not db:  # Allow health check even if DB is down
+            return jsonify({"error": "Database not available"}), 500
 
     @app.route("/health")
     def health():

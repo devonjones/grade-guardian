@@ -117,10 +117,7 @@ def test_scrape(ctx, student_name: str | None, output_dir: str | None, run_scrap
     click.echo("=" * 40)
 
     # Set output directory
-    if output_dir:
-        output_path = Path(output_dir)
-    else:
-        output_path = config.scraped_dir
+    output_path = Path(output_dir) if output_dir else config.scraped_dir
 
     output_path.mkdir(parents=True, exist_ok=True)
 
@@ -198,7 +195,7 @@ def run_docker_scraper(output_path: Path, student_name: str | None) -> Path | No
         if student_name:
             cmd.append(f"--student={student_name}")
 
-        result = subprocess.run(cmd, check=True, capture_output=True, text=True)
+        subprocess.run(cmd, check=True, capture_output=True, text=True)
 
         # Find the most recent scraped file
         scraped_files = list(output_path.glob("*.json"))
@@ -209,7 +206,7 @@ def run_docker_scraper(output_path: Path, student_name: str | None) -> Path | No
 
     except subprocess.CalledProcessError as e:
         logger.error(f"Docker scraper failed: {e.stderr}")
-        raise Exception(f"Docker scraper failed: {e.stderr}")
+        raise Exception(f"Docker scraper failed: {e.stderr}") from e
 
 
 def create_sample_data(output_path: Path, student_name: str | None) -> Path:
@@ -320,10 +317,7 @@ def init_db(ctx):
 @click.pass_context
 def create_config(ctx, config_path: str | None):
     """Create a default configuration file."""
-    if config_path:
-        path = Path(config_path)
-    else:
-        path = Path("tests/fixtures/config/config.yaml")
+    path = Path(config_path) if config_path else Path("tests/fixtures/config/config.yaml")
 
     if path.exists():
         click.confirm(f"Config file {path} already exists. Overwrite?", abort=True)
