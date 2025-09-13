@@ -6,6 +6,12 @@
 # Configuration files with sensitive data
 config/config.yaml
 config/config.yml
+data/config/config.yaml
+data/config/config.yml
+
+# Scraped data files (may contain sensitive student information)
+data/scraped/
+*.json
 
 # Python
 __pycache__/

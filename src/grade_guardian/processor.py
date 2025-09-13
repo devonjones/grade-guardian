@@ -176,11 +176,23 @@ class GradeDataProcessor:
                 if student['name'].strip().lower() == student_name.strip().lower():
                     return student['id']
             
-            # If not found, create new student with default values
-            # In production, we'd get these from configuration
-            default_phone = "+1234567890"
-            default_grade = 7
-            default_school = "DPS School"
+            # If not found, try to get student details from config
+            student_config = None
+            for student in self.config.students:
+                if student.name.strip().lower() == student_name.strip().lower():
+                    student_config = student
+                    break
+            
+            if student_config:
+                phone = student_config.phone
+                grade_level = student_config.grade_level
+                school = student_config.school
+            else:
+                # Fallback to defaults if not in config (should be rare)
+                logger.warning(f"Student {student_name} not found in config, using defaults")
+                phone = "+1234567890"
+                grade_level = 7
+                school = "DPS School"
             
             cursor.execute("""
                 INSERT INTO students (name, phone, grade_level, school)
@@ -188,9 +200,9 @@ class GradeDataProcessor:
                 RETURNING id
             """, {
                 "name": student_name,
-                "phone": default_phone,
-                "grade_level": default_grade,
-                "school": default_school
+                "phone": phone,
+                "grade_level": grade_level,
+                "school": school
             })
             
             result = cursor.fetchone()

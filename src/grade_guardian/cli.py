@@ -4,6 +4,7 @@ import click
 import logging
 import json
 import subprocess
+import datetime
 from pathlib import Path
 from typing import Optional
 
@@ -326,6 +327,4 @@ def create_config(ctx, config_path: Optional[str]):
 
 def main():
     """Main entry point for the CLI."""
-    import datetime
-    globals()['datetime'] = datetime
     cli()

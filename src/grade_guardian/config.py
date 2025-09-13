@@ -67,7 +67,7 @@ def load_config(config_path: Optional[Path] = None) -> AppConfig:
         "port": int(os.getenv("DATABASE_PORT", config_data.get("database", {}).get("port", 5432))),
         "name": os.getenv("DATABASE_NAME", config_data.get("database", {}).get("name", "grade_monitor")),
         "user": os.getenv("DATABASE_USER", config_data.get("database", {}).get("user", "gradebot")),
-        "password": os.getenv("DATABASE_PASSWORD", config_data.get("database", {}).get("password", "secure_password")),
+        "password": os.getenv("DATABASE_PASSWORD", config_data.get("database", {}).get("password")),
     }
     
     config_data["database"] = db_config

@@ -90,7 +90,8 @@ CREATE TABLE parent_actions (
     action_type VARCHAR(50) NOT NULL, -- excuse|ignore|prioritize|pause
     reason TEXT,
     expires_at TIMESTAMP,
-    created_at TIMESTAMP DEFAULT NOW()
+    created_at TIMESTAMP DEFAULT NOW(),
+    updated_at TIMESTAMP DEFAULT NOW()
 );
 
 -- System Events table

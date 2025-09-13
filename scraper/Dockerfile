@@ -27,6 +27,13 @@ RUN npx playwright install chromium --with-deps
 # Copy scraper code
 COPY *.js ./
 
+# Create a non-root user for security
+RUN useradd --create-home --shell /bin/bash appuser && \
+    chown -R appuser:appuser /app
+
+# Switch to non-root user
+USER appuser
+
 # Create output directory
 RUN mkdir -p /app/data/scraped
 
