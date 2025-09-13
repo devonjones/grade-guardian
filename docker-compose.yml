@@ -22,7 +22,7 @@ services:
       retries: 5
 
   flask-api:
-    build: 
+    build:
       context: .
       dockerfile: Dockerfile.flask
     container_name: grade-guardian-api
@@ -34,7 +34,7 @@ services:
       DATABASE_PASSWORD: ${POSTGRES_PASSWORD}
     volumes:
       - ./src:/app/src
-      - ./data:/app/data
+      - ./tests/fixtures:/app/tests/fixtures
     ports:
       - "5000:5000"
     networks:
@@ -57,10 +57,10 @@ services:
     environment:
       DPS_USERNAME: ${DPS_USERNAME}
       DPS_PASSWORD: ${DPS_PASSWORD}
-      OUTPUT_DIR: /app/data/scraped
+      OUTPUT_DIR: /app/tests/fixtures/scraped
       NODE_ENV: production
     volumes:
-      - ./data:/app/data
+      - ./tests/fixtures:/app/tests/fixtures
     networks:
       - grade-guardian-net
     profiles:
@@ -79,7 +79,7 @@ services:
       DATABASE_USER: ${POSTGRES_USER:-gradebot}
       DATABASE_PASSWORD: ${POSTGRES_PASSWORD}
     volumes:
-      - ./data:/app/data
+      - ./tests/fixtures:/app/tests/fixtures
     networks:
       - grade-guardian-net
     depends_on:

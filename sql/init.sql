@@ -33,7 +33,7 @@ CREATE TABLE courses (
     UNIQUE(student_id, schoology_id, semester, year)
 );
 
--- Assignments table  
+-- Assignments table
 CREATE TABLE assignments (
     id SERIAL PRIMARY KEY,
     uuid UUID DEFAULT uuid_generate_v4() UNIQUE NOT NULL,
@@ -134,9 +134,9 @@ CREATE TRIGGER update_reminders_updated_at BEFORE UPDATE ON reminders FOR EACH R
 CREATE TRIGGER update_parent_actions_updated_at BEFORE UPDATE ON parent_actions FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
 -- Insert initial test data
-INSERT INTO students (name, phone, grade_level, school) VALUES 
+INSERT INTO students (name, phone, grade_level, school) VALUES
 ('Test Student', '+1234567890', 7, 'Test School');
 
 -- Log successful initialization
-INSERT INTO system_events (event_type, severity, message, source) VALUES 
+INSERT INTO system_events (event_type, severity, message, source) VALUES
 ('database_init', 'info', 'Database schema initialized successfully', 'init_script');

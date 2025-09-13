@@ -15,7 +15,7 @@ students:
     grade_level: 7
     school: "Denver School of Arts MS"
     active: true
-  
+
   - name: "Anastasia"
     phone: "+1XXXXXXXXXX"
     grade_level: 3
@@ -42,11 +42,11 @@ notifications:
   twilio:
     from_phone: "+1XXXXXXXXXX"
     enable_sms: false  # Set to true in production
-  
+
   email:
     from_address: "grade-guardian@example.com"
     enable_email: false  # Set to true in production
-  
+
   timing:
     before_class_minutes: 5
     after_class_start_minutes: -5  # 5 min before class ends
@@ -66,7 +66,7 @@ scraper:
     headless: true
     timeout: 30000
     script_path: "./scraper/dps_scraper.js"
-  
+
   retry:
     auto_retry: true
     max_attempts: 3

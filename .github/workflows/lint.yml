@@ -1,0 +1,111 @@
+name: Lint and Test
+
+on:
+  pull_request:
+    branches: [ main, phase-* ]
+    paths:
+      - 'src/**/*.py'
+      - 'scraper/**/*.js'
+      - 'tests/**/*.py'
+      - 'pyproject.toml'
+      - 'scraper/package.json'
+
+jobs:
+  lint-python:
+    name: Lint Python Code
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+
+      - name: Install uv
+        run: pip install uv
+
+      - name: Install dependencies
+        run: uv sync --extra dev
+
+      - name: Run ruff linting
+        run: uv run ruff check src/
+
+      - name: Run ruff formatting check
+        run: uv run ruff format --check src/
+
+  lint-javascript:
+    name: Lint JavaScript Code
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+          cache-dependency-path: 'scraper/package-lock.json'
+
+      - name: Install dependencies
+        working-directory: ./scraper
+        run: npm ci
+
+      - name: Run ESLint
+        working-directory: ./scraper
+        run: npm run lint
+
+      - name: Check Prettier formatting
+        working-directory: ./scraper
+        run: npm run format:check
+
+  test-python:
+    name: Test Python Code
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+
+      - name: Install uv
+        run: pip install uv
+
+      - name: Install dependencies
+        run: uv sync --extra dev
+
+      - name: Run Python tests
+        run: uv run pytest --cov-report=xml
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v3
+        with:
+          file: ./coverage.xml
+          fail_ci_if_error: true
+
+  test-javascript:
+    name: Test JavaScript Code
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+          cache-dependency-path: 'scraper/package-lock.json'
+
+      - name: Install dependencies
+        working-directory: ./scraper
+        run: npm ci
+
+      - name: Run JavaScript tests
+        working-directory: ./scraper
+        run: npm run test:coverage

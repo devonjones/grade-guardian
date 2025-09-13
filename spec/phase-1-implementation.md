@@ -1,7 +1,7 @@
 # Phase 1 Implementation Plan
 
 ## Overview
-**Goal**: Establish core infrastructure and prove the scraping works  
+**Goal**: Establish core infrastructure and prove the scraping works
 **Deliverable**: Can manually scrape grades and store in database via CLI command
 
 ## Architecture Decisions
@@ -45,7 +45,7 @@
 - [ ] Implement basic configuration loading (`src/grade_guardian/config.py`)
 - [ ] Create CLI entry points (`src/grade_guardian/cli.py`)
 
-### 3. Flask API Foundation  
+### 3. Flask API Foundation
 - [ ] Create basic Flask app structure (`src/grade_guardian/api/`)
 - [ ] Implement database connection pooling
 - [ ] Create `/health` endpoint for Docker healthchecks
@@ -168,7 +168,7 @@ dps:
 
 ### Phase 1 Complete When:
 - [ ] `docker-compose up` starts PostgreSQL successfully
-- [ ] `uv run grade-guardian --health` reports all systems operational  
+- [ ] `uv run grade-guardian --health` reports all systems operational
 - [ ] `uv run grade-guardian --test-scrape` successfully:
   - Logs into DPS portal (with manual Duo approval)
   - Navigates to Schoology
@@ -222,7 +222,7 @@ dps:
 - Days 3-4: Basic Flask API and CLI
 - Days 5-7: Playwright scraper development
 
-### Week 2:  
+### Week 2:
 - Days 1-3: Integration and data pipeline
 - Days 4-5: Testing and validation
 - Days 6-7: Documentation and Phase 2 prep
