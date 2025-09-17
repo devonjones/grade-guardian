@@ -14,6 +14,9 @@ class DPSScraper {
     this.outputDir = options.outputDir || '../data/scraped';
     this.headless = options.headless !== false; // Default to headless
     this.timeout = options.timeout || 30000; // 30 second timeout
+    this.remoteDebugging = options.remoteDebugging || false;
+    this.debuggingPort = options.debuggingPort || 9222;
+    this.debuggingHost = options.debuggingHost || '0.0.0.0';
 
     if (!this.username || !this.password) {
       throw new Error('DPS_USERNAME and DPS_PASSWORD environment variables required');
@@ -36,11 +39,23 @@ class DPSScraper {
     try {
       console.log('🚀 Starting DPS grade scraping...');
 
-      // Launch browser
-      browser = await chromium.launch({
+      // Launch browser with optional remote debugging
+      const launchOptions = {
         headless: this.headless,
         args: ['--no-sandbox', '--disable-setuid-sandbox'],
-      });
+      };
+
+      // Add remote debugging if enabled
+      if (this.remoteDebugging) {
+        // Keep headless mode for server environments, debugging works in headless too
+        launchOptions.args.push(`--remote-debugging-port=${this.debuggingPort}`);
+        launchOptions.args.push(`--remote-debugging-address=${this.debuggingHost}`);
+        console.log(`🔍 Remote debugging enabled on ${this.debuggingHost}:${this.debuggingPort}`);
+        console.log(`   Connect from Windows: http://10.5.2.12:${this.debuggingPort}`);
+        console.log(`   Access DevTools: chrome://inspect or direct URL`);
+      }
+
+      browser = await chromium.launch(launchOptions);
 
       context = await browser.newContext({
         userAgent:
@@ -341,6 +356,17 @@ async function main() {
       default: 30000,
       description: 'Timeout in milliseconds for page operations',
     })
+    .option('remote-debug', {
+      alias: 'd',
+      type: 'boolean',
+      default: false,
+      description: 'Enable Chrome remote debugging (accessible from remote machine)',
+    })
+    .option('debug-port', {
+      type: 'number',
+      default: 9222,
+      description: 'Port for Chrome remote debugging',
+    })
     .help()
     .alias('help', 'h')
     .version('0.1.0').argv;
@@ -350,6 +376,8 @@ async function main() {
       headless: argv.headless,
       outputDir: argv.outputDir,
       timeout: argv.timeout,
+      remoteDebugging: argv.remoteDebug,
+      debuggingPort: argv.debugPort,
     });
 
     await scraper.scrapeGrades(argv.student);

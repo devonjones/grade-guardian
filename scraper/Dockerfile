@@ -18,14 +18,15 @@ WORKDIR /app/scraper
 # Copy package files
 COPY package*.json ./
 
-# Install dependencies
-RUN npm ci --only=production
+# Install all dependencies (including dev for debugging)
+RUN npm ci
 
 # Install Playwright browsers
 RUN npx playwright install chromium --with-deps
 
-# Copy scraper code
+# Copy scraper code and debugging scripts
 COPY *.js ./
+COPY *.py ./
 
 # Create a non-root user for security
 RUN useradd --create-home --shell /bin/bash appuser && \
@@ -40,6 +41,9 @@ RUN mkdir -p /app/data/scraped
 # Set environment
 ENV OUTPUT_DIR=/app/data/scraped
 ENV NODE_ENV=production
+
+# Expose Chrome remote debugging port
+EXPOSE 9222
 
 # Default command
 CMD ["node", "dps_scraper.js"]

@@ -68,6 +68,26 @@ services:
       - scraper  # Only start when explicitly requested
     command: ["node", "dps_scraper.js"]
 
+  scraper-debug:
+    build:
+      context: ./scraper
+      dockerfile: Dockerfile
+    container_name: grade-guardian-scraper-debug
+    environment:
+      DPS_USERNAME: ${DPS_USERNAME}
+      DPS_PASSWORD: ${DPS_PASSWORD}
+      OUTPUT_DIR: /app/data/scraped
+      NODE_ENV: development
+    volumes:
+      - ./data:/app/data
+    ports:
+      - "9222:9222"  # Forward container's localhost:9222 to host's 0.0.0.0:9222
+    networks:
+      - grade-guardian-net
+    profiles:
+      - debug  # Only start when explicitly requested
+    command: ["node", "debug_scraper.js", "--timeout=600000"]
+
   cli:
     build:
       context: .
