@@ -1,0 +1,61 @@
+{
+  "scrape_timestamp": "2025-09-12T22:51:26.431341",
+  "student": "Aurelia",
+  "courses": [
+    {
+      "schoology_id": "12345",
+      "name": "7th Grade Language Arts",
+      "teacher": "Ms. Johnson",
+      "semester": "Fall 2024",
+      "assignments": [
+        {
+          "schoology_id": "assign_001",
+          "name": "Essay on Romeo and Juliet",
+          "category": "work_product",
+          "category_weight": 55,
+          "due_date": "2024-12-15T23:59:00Z",
+          "assigned_date": "2024-12-01T08:00:00Z",
+          "points_possible": 100,
+          "points_earned": null,
+          "status": "missing",
+          "raw_display": "Missing",
+          "can_be_resubmitted": true
+        },
+        {
+          "schoology_id": "assign_002",
+          "name": "Vocabulary Quiz Chapter 5",
+          "category": "process",
+          "category_weight": 35,
+          "due_date": "2024-12-10T23:59:00Z",
+          "assigned_date": "2024-12-03T08:00:00Z",
+          "points_possible": 50,
+          "points_earned": 42,
+          "status": "graded",
+          "raw_display": "42",
+          "can_be_resubmitted": false
+        }
+      ]
+    },
+    {
+      "schoology_id": "67890",
+      "name": "7th Grade Math",
+      "teacher": "Mr. Smith",
+      "semester": "Fall 2024",
+      "assignments": [
+        {
+          "schoology_id": "assign_003",
+          "name": "Algebra Practice Set 3",
+          "category": "work_product",
+          "category_weight": 55,
+          "due_date": "2024-12-12T23:59:00Z",
+          "assigned_date": "2024-12-05T08:00:00Z",
+          "points_possible": 75,
+          "points_earned": 0,
+          "status": "missing",
+          "raw_display": "0",
+          "can_be_resubmitted": true
+        }
+      ]
+    }
+  ]
+}

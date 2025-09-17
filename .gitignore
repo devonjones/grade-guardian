@@ -6,6 +6,19 @@
 # Configuration files with sensitive data
 config/config.yaml
 config/config.yml
+tests/fixtures/config/config.yaml
+tests/fixtures/config/config.yml
+
+# Production data directories (not test fixtures)
+data/scraped/
+data/config/
+
+# Test coverage and reports
+htmlcov/
+coverage.xml
+.coverage
+coverage/
+scraper/coverage/
 
 # Python
 __pycache__/

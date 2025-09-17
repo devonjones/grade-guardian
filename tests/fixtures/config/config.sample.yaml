@@ -1,0 +1,20 @@
+# Grade Guardian Configuration Sample
+# Copy this file to config.yaml and update with your actual values
+
+students:
+  - name: "Your Student Name"
+    phone: "+1234567890"  # Replace with actual phone
+    grade_level: 7        # Replace with actual grade level
+    school: "Your School Name"  # Replace with actual school
+
+database:
+  host: "postgres"  # Docker Compose service name
+  port: 5432
+  name: "grade_monitor"
+  user: "gradebot"
+  password: "${DATABASE_PASSWORD}"
+
+# DPS credentials should be set via environment variables:
+# export DPS_USERNAME='your_dps_username'
+# export DPS_PASSWORD='your_dps_password'
+# export DATABASE_PASSWORD='your_secure_db_password'

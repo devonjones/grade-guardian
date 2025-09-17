@@ -1,15 +1,31 @@
 [project]
 name = "grade-guardian"
 version = "0.1.0"
-description = "Add your description here"
-readme = "README.md"
+description = "Automated system to monitor student grades in Denver Public Schools via Schoology and send SMS reminders"
+readme = { text = "Grade Guardian - Automated grade monitoring for DPS/Schoology", content-type = "text/plain" }
 authors = [
     { name = "Devon Jones", email = "devon.jones@gmail.com" }
 ]
-requires-python = ">=3.13"
+requires-python = ">=3.12"
 dependencies = [
     "python-dotenv>=1.0.0",
     "pyyaml>=6.0.0",
+    "flask>=3.0.0",
+    "psycopg[binary,pool]>=3.1.0",
+    "click>=8.1.0",
+    "pydantic>=2.5.0",
+    "python-dateutil>=2.8.0",
+    "requests>=2.31.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "ruff>=0.1.0",
+    "pre-commit>=3.0.0",
+    "pytest>=7.0.0",
+    "pytest-cov>=4.0.0",
+    "pytest-mock>=3.10.0",
+    "pytest-asyncio>=0.21.0",
 ]
 
 [project.scripts]
@@ -18,3 +34,62 @@ grade-guardian = "grade_guardian:main"
 [build-system]
 requires = ["uv_build>=0.8.13,<0.9.0"]
 build-backend = "uv_build"
+
+[tool.ruff]
+# Moderate linting configuration
+line-length = 100
+target-version = "py312"
+
+[tool.ruff.lint]
+# Enable moderate rule sets + strict import rules
+select = [
+    "E",   # pycodestyle errors
+    "W",   # pycodestyle warnings
+    "F",   # Pyflakes
+    "I",   # isort (import sorting and organization)
+    "N",   # pep8-naming
+    "UP",  # pyupgrade
+    "B",   # flake8-bugbear
+    "C4",  # flake8-comprehensions
+    "SIM", # flake8-simplify
+    "E401", # Multiple imports on one line
+    "E402", # Module imports not at top of file
+]
+
+# Ignore overly strict rules for moderate config
+ignore = [
+    "E501",  # Line too long (handled by formatter)
+    "B008",  # Do not perform function calls in argument defaults
+    "N806",  # Variable in function should be lowercase (allow mixed case)
+]
+
+[tool.ruff.lint.per-file-ignores]
+# Allow longer lines in migration files and config
+"sql/*.sql" = ["E501"]
+"tests/fixtures/**" = ["E501"]
+"config/**" = ["E501"]
+
+[tool.ruff.format]
+# Use double quotes, indent with 4 spaces
+quote-style = "double"
+indent-style = "space"
+
+[tool.pytest.ini_options]
+# Pytest configuration
+testpaths = ["tests"]
+python_files = ["test_*.py", "*_test.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+addopts = [
+    "--strict-markers",
+    "--strict-config",
+    "--cov=src/grade_guardian",
+    "--cov-report=term-missing",
+    "--cov-report=html",
+    "--cov-fail-under=25",  # Initial setup, will increase later
+]
+markers = [
+    "unit: Unit tests",
+    "integration: Integration tests",
+    "slow: Slow running tests",
+]

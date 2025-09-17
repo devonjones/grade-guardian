@@ -1,0 +1,36 @@
+{
+  "name": "grade-guardian-scraper",
+  "version": "0.1.0",
+  "description": "Playwright-based scraper for DPS/Schoology grade data",
+  "main": "dps_scraper.js",
+  "scripts": {
+    "scrape": "node dps_scraper.js",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage",
+    "lint": "eslint *.js",
+    "lint:fix": "eslint *.js --fix",
+    "format": "prettier --write *.js",
+    "format:check": "prettier --check *.js"
+  },
+  "dependencies": {
+    "playwright": "^1.49.0",
+    "yargs": "^18.0.0"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.49.0",
+    "eslint": "^8.57.0",
+    "eslint-config-standard": "^17.1.0",
+    "eslint-plugin-import": "^2.31.0",
+    "eslint-plugin-n": "^16.6.0",
+    "eslint-plugin-promise": "^6.6.0",
+    "prettier": "^3.4.0",
+    "eslint-config-prettier": "^10.1.0",
+    "eslint-plugin-prettier": "^5.2.0",
+    "jest": "^30.1.0",
+    "jest-environment-node": "^30.1.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

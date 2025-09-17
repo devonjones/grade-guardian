@@ -1,0 +1,60 @@
+# Pre-commit hooks configuration
+# Install with: pre-commit install
+
+repos:
+  # Python linting and formatting with ruff
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.1.15
+    hooks:
+      # Run the linter
+      - id: ruff
+        args: [--fix, --exit-non-zero-on-fix]
+      # Run the formatter
+      - id: ruff-format
+
+  # Node.js linting and formatting
+  - repo: local
+    hooks:
+      - id: eslint-scraper
+        name: ESLint (scraper)
+        entry: bash -c 'cd scraper && npm run lint:fix'
+        language: system
+        files: ^scraper/.*\.js$
+        pass_filenames: false
+
+      - id: prettier-scraper
+        name: Prettier (scraper)
+        entry: bash -c 'cd scraper && npm run format'
+        language: system
+        files: ^scraper/.*\.js$
+        pass_filenames: false
+
+  # Testing hooks (optional - can be enabled if you want tests in pre-commit)
+  - repo: local
+    hooks:
+      - id: pytest
+        name: Run Python tests
+        entry: bash -c 'uv run pytest tests/ -x'
+        language: system
+        files: ^(src/|tests/).*\.py$
+        pass_filenames: false
+        stages: [manual]  # Only run when explicitly requested
+
+      - id: jest
+        name: Run JavaScript tests
+        entry: bash -c 'cd scraper && npm test'
+        language: system
+        files: ^scraper/.*\.js$
+        pass_filenames: false
+        stages: [manual]  # Only run when explicitly requested
+
+  # General file checks
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.5.0
+    hooks:
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+      - id: check-yaml
+      - id: check-json
+      - id: check-merge-conflict
+      - id: check-added-large-files

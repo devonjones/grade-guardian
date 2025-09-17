@@ -1,0 +1,26 @@
+FROM python:3.13-slim
+
+WORKDIR /app
+
+# Install uv
+RUN pip install uv
+
+# Copy dependency files first for better caching
+COPY pyproject.toml uv.lock* ./
+
+# Install dependencies (cached layer)
+RUN uv sync
+
+# Copy source code and config (changes more frequently)
+COPY src/ ./src/
+COPY config/ ./config/
+
+# Create a non-root user for security
+RUN useradd --create-home --shell /bin/bash appuser && \
+    chown -R appuser:appuser /app
+
+# Switch to non-root user
+USER appuser
+
+# Default command runs the CLI
+ENTRYPOINT ["uv", "run", "grade-guardian"]

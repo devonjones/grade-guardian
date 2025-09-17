@@ -17,7 +17,7 @@ Automated system to monitor student grades in Denver Public Schools (DPS) via Sc
 ### Technology Stack
 - **Primary Runtime**: Python 3.13
 - **Web Automation**: Playwright (via Node.js subprocess)
-- **Database**: PostgreSQL (psycopg2/SQLAlchemy)
+- **Database**: PostgreSQL (psycopg3)
 - **SMS Service**: Twilio API (Python SDK)
 - **Web Framework**: FastAPI or Flask
 - **Task Queue**: Celery with Redis (optional)
@@ -107,7 +107,7 @@ database:
   host: "localhost"
   port: 5432
   name: "grade_monitor"
-  
+
 twilio:
   account_sid: "XXXX"
   auth_token: "XXXX"
@@ -131,7 +131,7 @@ grading:
     process: 35
     work_product: 55
     final: 10
-    
+
 makeup_rules:
   enabled: true
   window_days: 14
@@ -142,7 +142,7 @@ makeup_rules:
 patterns:
   missing_indicators: ["Missing", "M", "0", ""]
   excused_indicators: ["E", "Excused"]
-  
+
 reminder_rules:
   enabled: true
   priority: high  # high|medium|low
@@ -270,7 +270,7 @@ def generate_reminder_message(assignments, student, class_time):
 ### Pages
 1. **Dashboard** - Summary view with alerts
 2. **Students** - Manage student profiles
-3. **Courses** - View/edit course configurations  
+3. **Courses** - View/edit course configurations
 4. **Assignments** - Detailed assignment list with actions
 5. **Reminders** - History and scheduling
 6. **Settings** - System configuration
@@ -438,7 +438,7 @@ PLAYWRIGHT_SCRIPT_PATH=./scraper/dps_scraper.js
 ## Success Metrics
 
 - Reduction in missing assignments
-- Improvement in end-of-semester grades  
+- Improvement in end-of-semester grades
 - Consistent reminder delivery
 - System uptime >99%
 - Parent satisfaction with visibility

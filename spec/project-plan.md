@@ -192,7 +192,7 @@ Automated system to monitor student grades in Denver Public Schools (DPS) via Sc
 For immediate results, complete these milestones in order:
 
 1. **Week 1**: Get Playwright scraping working manually
-2. **Week 1**: Store scraped data in PostgreSQL  
+2. **Week 1**: Store scraped data in PostgreSQL
 3. **Week 2**: Send your first test SMS via Twilio
 4. **Week 2**: Schedule first automated sync with Ofelia
 5. **Week 3**: Send first real reminder to your daughter
@@ -252,7 +252,7 @@ For immediate results, complete these milestones in order:
 - Successfully scrape all grades for one student
 - Store 1 week of grade history in database
 
-### Phase 3-4 Success  
+### Phase 3-4 Success
 - Send 10+ successful reminder SMS messages
 - Achieve 95% uptime for daily sync
 
